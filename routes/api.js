@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const express = require('express');
-const { assetsFn, pricesFn, portfoliosFn } = require('../db');
+const jwt = require("jsonwebtoken");
+const express = require("express");
+const { productsFn, assetsFn, pricesFn, portfoliosFn } = require("../db");
 const router = express.Router();
 
 // Middleware to Verify Access Token
@@ -17,31 +17,37 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Protected Route Example
-router.get("/protected", authenticateToken, (req, res) => {
-    res.json({ message: "Protected data", user: req.user });
+//// FastLight
+router.get("/products", (req, res) => {
+    res.json(productsFn());
 });
 
+//// End FastLight
+
+//// Vega
 router.get("/assets", authenticateToken, (req, res) => {
-    res.json(assetsFn())
-})
+    res.json(assetsFn());
+});
 
 // query params: /prices?assets=AAPL,GOOGL&asOf=2021-08-01
 router.get("/prices", authenticateToken, (req, res) => {
     const assets = req.query.assets ? req.query.assets.split(",") : null;
-    const prices = pricesFn()
+    const prices = pricesFn();
 
-    const filteredPrices = !assets ? prices : prices.filter(p => assets.includes(p.asset));
+    const filteredPrices = !assets
+        ? prices
+        : prices.filter((p) => assets.includes(p.asset));
 
-    res.json(filteredPrices)
-})
+    res.json(filteredPrices);
+});
 
 // query params: /positions?asOf=2021-08-01
 router.get("/portfolios", authenticateToken, (req, res) => {
-    const asOf = req.query.asOf ? req.query.asOf.split(",") : ['2021-08-01']
-    const portfolio = portfoliosFn(asOf)
+    const asOf = req.query.asOf ? req.query.asOf.split(",") : ["2021-08-01"];
+    const portfolio = portfoliosFn(asOf);
 
-    res.json(portfolio)
-})
+    res.json(portfolio);
+});
+//// end Vega
 
 module.exports = router;
